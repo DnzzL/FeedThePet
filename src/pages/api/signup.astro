@@ -1,0 +1,38 @@
+---
+import { ClientResponseError } from "pocketbase";
+import { z } from "zod";
+import { zfd } from "zod-form-data";
+import Alert from "../../components/Alert.astro";
+
+const loginSchema = zfd.formData({
+  email: zfd.text(z.string().email()),
+  username: zfd.text(z.string().min(3)),
+  password: zfd.text(),
+  passwordConfirmation: zfd.text(),
+});
+
+let isSubmitted = false;
+let errorMessage: string | null = null;
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const formData = loginSchema.parse(data);
+
+    const pb = Astro.locals.pb;
+    await pb.collection("users").create(formData);
+    Astro.response.headers.set("HX-Redirect", "/");
+  } catch (error) {
+    if (error instanceof ClientResponseError) {
+      errorMessage = error.message;
+      Astro.response.status = error.status;
+      Astro.response.statusText = errorMessage;
+    }
+  } finally {
+    isSubmitted = true;
+  }
+}
+
+export const partial = true;
+---
+
+{isSubmitted ? <Alert message={errorMessage} /> : null}

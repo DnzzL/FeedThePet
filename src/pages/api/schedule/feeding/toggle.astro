@@ -1,0 +1,71 @@
+---
+import { zfd } from "zod-form-data";
+import ScheduleTableRow from "../../../../components/ScheduleTableRow.astro";
+import type {
+  FoodsResponse,
+  ScheduleEntriesResponse,
+  SchedulesResponse,
+} from "../../../../types/pocketbase";
+
+const pb = Astro.locals.pb;
+
+const today = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+
+const toggleSchema = zfd.formData({
+  petId: zfd.text(),
+  scheduleEntryId: zfd.text(),
+});
+
+let initialDone;
+let scheduleEntry;
+let petId;
+let foodName;
+
+if (Astro.request.method === "PUT") {
+  try {
+    const data = await Astro.request.formData();
+    const parsed = toggleSchema.parse(data);
+    petId = parsed.petId;
+    const scheduleEntryId = parsed.scheduleEntryId;
+
+    const existingScheduleFeeding = await pb
+      .collection("schedule_entry_feedings")
+      .getFullList({
+        filter: `schedule_entry.schedule.pet.id = "${petId}" && schedule_entry.id = "${scheduleEntryId}" && created > "${today}"`,
+      });
+
+    scheduleEntry = await pb.collection("schedule_entries").getOne<
+      ScheduleEntriesResponse<{
+        food: FoodsResponse;
+        schedule: SchedulesResponse;
+      }>
+    >(scheduleEntryId, { expand: "schedule,food" });
+    foodName = scheduleEntry.expand?.food.name;
+
+    if (existingScheduleFeeding.length === 1) {
+      initialDone = existingScheduleFeeding[0]?.is_done;
+      await pb
+        .collection("schedule_entry_feedings")
+        .update(existingScheduleFeeding[0].id, {
+          is_done: !initialDone,
+        });
+    } else {
+      await pb.collection("schedule_entry_feedings").create({
+        quantity: scheduleEntry.quantity,
+        food: scheduleEntry.food,
+        pet: petId,
+        feeder: pb.authStore.model!.id,
+        schedule_entry: scheduleEntryId,
+        time: new Date(),
+        is_done: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const partial = true;
+---
+
+<ScheduleTableRow scheduleEntry={scheduleEntry} isDone={!initialDone} />

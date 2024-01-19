@@ -1,0 +1,52 @@
+---
+import type {
+  FoodsResponse,
+  ScheduleEntriesResponse,
+  SchedulesResponse,
+} from "../types/pocketbase";
+
+type Props = {
+  scheduleEntry: ScheduleEntriesResponse<{
+    food: FoodsResponse;
+    schedule: SchedulesResponse;
+  }>;
+  isDone: boolean;
+};
+
+const { scheduleEntry, isDone } = Astro.props;
+
+const feedingTime = new Date(scheduleEntry.time).toLocaleTimeString([], {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+const foodName = scheduleEntry.expand?.food.name;
+const quantity = `${scheduleEntry.quantity} ${scheduleEntry.unit}`;
+
+const petId = scheduleEntry.expand?.schedule.pet;
+---
+
+<tr id={`pet-${scheduleEntry.id}`}>
+  <td>
+    <form>
+      <input type="hidden" name="petId" value={petId} />
+      <input type="hidden" name="scheduleEntryId" value={scheduleEntry.id} />
+      <input
+        type="checkbox"
+        name="scheduleEntryCheck"
+        value={scheduleEntry.id}
+        checked={isDone}
+        hx-put="/api/schedule/feeding/toggle"
+        hx-include="closest form"
+        hx-target="closest tr"
+        hx-swap="outerHTML"
+      />
+    </form>
+    <td>
+      {isDone ? <s>{feedingTime}</s> : feedingTime}
+    </td>
+    <td>{isDone ? <s>{foodName}</s> : foodName}</td>
+    <td>
+      {isDone ? <s>{quantity}</s> : quantity}
+    </td>
+  </td>
+</tr>

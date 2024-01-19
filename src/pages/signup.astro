@@ -1,0 +1,30 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="S'enregistrer">
+  <main>
+    <h1>S'enregistrer</h1>
+    <div id="error" class="pb-2"></div>
+    <form hx-post="/api/signup" hx-target-error="#error">
+      <label for="email"
+        >Email <input type="email" name="email" id="email" /></label
+      >
+      <label for="username"
+        >Username <input type="text" name="username" id="username" /></label
+      >
+      <label for="password"
+        >Password <input type="password" name="password" id="password" /></label
+      >
+      <label for="passwordConfirmation"
+        >Confirm Password <input
+          type="password"
+          name="passwordConfirmation"
+          id="passwordConfirmation"
+        /></label
+      >
+      <button type="submit">Signup</button>
+    </form>
+    <a href="/login">Se connecter</a>
+  </main>
+</Layout>

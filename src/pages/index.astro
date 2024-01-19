@@ -1,0 +1,120 @@
+---
+import FeedingProgress from "../components/FeedingProgress.astro";
+import ScheduleTableRow from "../components/ScheduleTableRow.astro";
+import Layout from "../layouts/Layout.astro";
+import type {
+  FoodsResponse,
+  ScheduleEntriesResponse,
+  ScheduleEntryFeedingsResponse,
+  SchedulesResponse,
+} from "../types/pocketbase";
+import {
+  getGivenScheduleFood,
+  getRequiredScheduleFood,
+} from "../utils/feedings";
+
+const pb = Astro.locals.pb;
+
+const today = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+
+const pets = await pb.collection("pets").getFullList({
+  filter: `owner.id = "${pb.authStore.model?.id}"`,
+});
+
+const scheduleEntries = await pb.collection("schedule_entries").getFullList<
+  ScheduleEntriesResponse<{
+    food: FoodsResponse;
+    schedule: SchedulesResponse;
+  }>
+>({
+  expand: "food,schedule",
+  filter: `schedule.pet.owner.id = "${pb.authStore.model?.id}"`,
+});
+
+const requiredFood = await getRequiredScheduleFood(scheduleEntries);
+
+const scheduleEntryFeedings = await pb
+  .collection("schedule_entry_feedings")
+  .getFullList<
+    ScheduleEntryFeedingsResponse<{
+      schedule_entry: ScheduleEntriesResponse<{
+        food: FoodsResponse;
+        schedule: SchedulesResponse;
+      }>;
+    }>
+  >({
+    filter: `created >= "${today}"`,
+    expand: `schedule_entry,schedule_entry.food,schedule_entry.schedule`,
+  });
+
+const givenFood = await getGivenScheduleFood(scheduleEntryFeedings);
+---
+
+<Layout title="Feeding">
+  {
+    pets.map((pet) => (
+      <>
+        <section>
+          <div>
+            <h2>{pet.name}</h2>
+            <span>
+              <iconify-icon icon="tabler:calendar" />
+              {new Date().getFullYear() -
+                new Date(pet.birthdate).getFullYear()}{" "}
+              ans
+            </span>
+            <span>
+              <iconify-icon icon="tabler:weight" />
+              {pet.current_weight} kg
+            </span>
+          </div>
+          <div>
+            {Object.entries(requiredFood[pet.id]).map(
+              ([foodName, quantity]) => {
+                const givenQuantity =
+                  (givenFood[pet.id] && givenFood[pet.id][foodName]) || 0;
+                const percentage = Math.round((givenQuantity / quantity) * 100);
+
+                return (
+                  <FeedingProgress
+                    petId={pet.id}
+                    foodName={foodName}
+                    percentage={percentage}
+                  />
+                );
+              }
+            )}
+          </div>
+        </section>
+
+        <section>
+          <figure>
+            <table role="grid">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Heure</th>
+                  <th scope="col">Nourriture</th>
+                  <th scope="col">Quantité</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scheduleEntries
+                  .filter((entry) => entry.expand?.schedule.pet === pet.id)
+                  .map((entry) => (
+                    <ScheduleTableRow
+                      scheduleEntry={entry}
+                      isDone={scheduleEntryFeedings.some(
+                        (feeding) =>
+                          feeding.schedule_entry === entry.id && feeding.is_done
+                      )}
+                    />
+                  ))}
+              </tbody>
+            </table>
+          </figure>
+        </section>
+      </>
+    ))
+  }
+</Layout>

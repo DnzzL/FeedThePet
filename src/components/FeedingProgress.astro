@@ -1,0 +1,16 @@
+---
+type Props = {
+  petId: string;
+  foodName: string;
+  percentage: number;
+};
+const { petId, foodName, percentage } = Astro.props;
+
+export const partial = true;
+---
+
+<div id={`${petId}_${foodName}`}>
+  <span>{foodName}</span>
+  <span>{percentage}%</span>
+  <progress value={percentage} max="100"></progress>
+</div>
