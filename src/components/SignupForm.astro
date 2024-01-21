@@ -1,0 +1,44 @@
+---
+export const partial = true;
+
+type Props = {
+  invalid?: boolean;
+};
+const { invalid } = Astro.props;
+---
+
+<form hx-post="/api/signup" hx-target-error="#error">
+  <label for="email"
+    >Email <input
+      type="email"
+      name="email"
+      id="email"
+      aria-invalid={!!invalid}
+    /></label
+  >
+  <label for="username"
+    >Username <input
+      type="text"
+      name="username"
+      id="username"
+      aria-invalid={!!invalid}
+    /></label
+  >
+  <label for="password"
+    >Password <input
+      type="password"
+      name="password"
+      id="password"
+      aria-invalid={!!invalid}
+    /></label
+  >
+  <label for="passwordConfirmation"
+    >Confirm Password <input
+      type="password"
+      name="passwordConfirmation"
+      id="passwordConfirmation"
+      aria-invalid={!!invalid}
+    /></label
+  >
+  <button type="submit">Signup</button>
+</form>

@@ -68,4 +68,10 @@ if (Astro.request.method === "PUT") {
 export const partial = true;
 ---
 
-<ScheduleTableRow scheduleEntry={scheduleEntry} isDone={!initialDone} />
+{
+  !scheduleEntry ? (
+    <p>Erreur</p>
+  ) : (
+    <ScheduleTableRow scheduleEntry={scheduleEntry} isDone={!initialDone} />
+  )
+}

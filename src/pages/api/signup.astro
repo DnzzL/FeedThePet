@@ -2,7 +2,7 @@
 import { ClientResponseError } from "pocketbase";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import Alert from "../../components/Alert.astro";
+import SignupForm from "../../components/SignupForm.astro";
 
 const loginSchema = zfd.formData({
   email: zfd.text(z.string().email()),
@@ -35,4 +35,4 @@ if (Astro.request.method === "POST") {
 export const partial = true;
 ---
 
-{isSubmitted ? <Alert message={errorMessage} /> : null}
+{isSubmitted ? <SignupForm invalid /> : null}
