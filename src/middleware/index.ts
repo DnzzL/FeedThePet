@@ -6,7 +6,7 @@ const UNLOGGED_ROUTES = ["/login", "/signup"];
 
 const authCookie = defineMiddleware(
   async ({ locals, request }: any, next: () => any) => {
-    locals.pb = new PocketBase("http://localhost:8090");
+    locals.pb = new PocketBase(process.env.POCKETBASE_URL);
 
     // load the store data from the request cookie string
     locals.pb.authStore.loadFromCookie(request.headers.get("cookie") || "");
