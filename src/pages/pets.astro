@@ -4,11 +4,11 @@ import Layout from "../layouts/Layout.astro";
 const pb = Astro.locals.pb;
 
 const pets = await pb.collection("pets").getFullList({
-  filter: `owner.id = "${pb.authStore.model?.id}"`,
+  filter: `owner.id ?= "${pb.authStore.model?.id}"`,
 });
 
 const weights = await pb.collection("pet_weights").getFullList({
-  filter: `pet.owner.id = "${pb.authStore.model?.id}"`,
+  filter: `pet.owner.id ?= "${pb.authStore.model?.id}"`,
   sort: "-created",
 });
 ---

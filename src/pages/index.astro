@@ -15,10 +15,8 @@ import {
 
 const pb = Astro.locals.pb;
 
-const today = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-
 const pets = await pb.collection("pets").getFullList({
-  filter: `owner.id = "${pb.authStore.model?.id}"`,
+  filter: `owner.id ?= "${pb.authStore.model?.id}"`,
 });
 
 const scheduleEntries = await pb.collection("schedule_entries").getFullList<
@@ -28,7 +26,7 @@ const scheduleEntries = await pb.collection("schedule_entries").getFullList<
   }>
 >({
   expand: "food,schedule",
-  filter: `schedule.pet.owner.id = "${pb.authStore.model?.id}"`,
+  filter: `schedule.pet.owner.id ?= "${pb.authStore.model?.id}"`,
 });
 
 const requiredFood = await getRequiredScheduleFood(scheduleEntries);
@@ -43,7 +41,7 @@ const scheduleEntryFeedings = await pb
       }>;
     }>
   >({
-    filter: `created >= "${today}"`,
+    filter: `created >= @todayStart`,
     expand: `schedule_entry,schedule_entry.food,schedule_entry.schedule`,
   });
 
