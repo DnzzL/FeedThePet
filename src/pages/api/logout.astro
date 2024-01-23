@@ -1,25 +1,13 @@
 ---
 import { ClientResponseError } from "pocketbase";
-import { z } from "zod";
-import { zfd } from "zod-form-data";
-import SignupForm from "../../components/SignupForm.astro";
-
-const loginSchema = zfd.formData({
-  email: zfd.text(z.string().email()),
-  username: zfd.text(z.string().min(3)),
-  password: zfd.text(),
-  passwordConfirm: zfd.text(),
-});
 
 let isSubmitted = false;
 let errorMessage: string | null = null;
 if (Astro.request.method === "POST") {
   try {
-    const data = await Astro.request.formData();
-    const formData = loginSchema.parse(data);
-
     const pb = Astro.locals.pb;
-    await pb.collection("users").create({ ...formData, verified: true });
+
+    await pb.authStore.clear();
     Astro.response.headers.set("HX-Redirect", "/login");
   } catch (error) {
     if (error instanceof ClientResponseError) {
@@ -35,4 +23,10 @@ if (Astro.request.method === "POST") {
 export const partial = true;
 ---
 
-{isSubmitted ? <SignupForm invalid /> : null}
+{
+  isSubmitted ? (
+    <p hx-swap-oob="closest .error">
+      <mark>{errorMessage}</mark>
+    </p>
+  ) : null
+}

@@ -7,7 +7,7 @@ type Props = {
 const { invalid } = Astro.props;
 ---
 
-<form hx-post="/api/signup" hx-target-error="#error">
+<form hx-post="/api/signup" hx-target-error="closest .error">
   <label for="email"
     >Email <input
       type="email"
@@ -32,11 +32,11 @@ const { invalid } = Astro.props;
       aria-invalid={!!invalid}
     /></label
   >
-  <label for="passwordConfirmation"
+  <label for="passwordConfirm"
     >Confirm Password <input
       type="password"
-      name="passwordConfirmation"
-      id="passwordConfirmation"
+      name="passwordConfirm"
+      id="passwordConfirm"
       aria-invalid={!!invalid}
     /></label
   >

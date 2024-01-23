@@ -1,13 +1,13 @@
 ---
 import LoginForm from "../components/LoginForm.astro";
-import Layout from "../layouts/Layout.astro";
+import Unlogged from "../layouts/Unlogged.astro";
 ---
 
-<Layout title="Se connecter">
+<Unlogged title="Se connecter">
   <main>
     <h1>Se connecter</h1>
-    <div id="error" class="pb-2"></div>
+    <div class="error" class="pb-2"></div>
     <LoginForm />
     <a href="/signup">Créer un compte</a>
   </main>
-</Layout>
+</Unlogged>

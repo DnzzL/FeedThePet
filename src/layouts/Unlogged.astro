@@ -17,7 +17,10 @@ const primaryColor = "#438e96";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="node_modules/@picocss/pico/css/pico.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
+    />
     <title>{title}</title>
     <script
       src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"
@@ -29,7 +32,7 @@ const primaryColor = "#438e96";
     <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"
     ></script>
   </head>
-  <body>
+  <body class="container">
     <slot />
   </body>
 </html>

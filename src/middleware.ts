@@ -30,14 +30,14 @@ const authCookie = defineMiddleware(
 );
 
 const guardedPage = defineMiddleware(
-  async ({ locals }: any, next: () => any) => {
+  async ({ locals, url, redirect }, next: () => any) => {
     const response = await next();
 
     if (
       !locals.pb.authStore.isValid &&
-      !UNLOGGED_ROUTES.includes(locals.path)
+      !UNLOGGED_ROUTES.includes(url.pathname)
     ) {
-      response.headers.append("HX-Redirect", "/login");
+      return redirect("/login");
     }
 
     return response;

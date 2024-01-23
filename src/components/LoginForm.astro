@@ -7,7 +7,7 @@ type Props = {
 const { invalid } = Astro.props;
 ---
 
-<form hx-post="/api/login" hx-target-error="#error">
+<form hx-post="/api/login" hx-target-error="closest .error">
   <label for="username"
     >Username <input
       type="text"
