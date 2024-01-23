@@ -15,7 +15,7 @@ type Props = {
 
 const { scheduleEntry, isDone } = Astro.props;
 
-const feedingTime = new Date(scheduleEntry.time).toLocaleTimeString([], {
+const feedingTime = new Date(scheduleEntry.time).toLocaleTimeString(["fr-FR"], {
   hour: "2-digit",
   minute: "2-digit",
 });

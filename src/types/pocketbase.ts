@@ -108,8 +108,8 @@ export type PetsRecord = {
 }
 
 export enum ScheduleEntriesUnitOptions {
-	"grams" = "grams",
-	"can" = "can",
+	"g" = "g",
+	"boîte" = "boîte",
 }
 export type ScheduleEntriesRecord = {
 	food: RecordIdString

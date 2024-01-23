@@ -1,0 +1,147 @@
+---
+import type {
+  DietFoodsResponse,
+  FeedingsResponse,
+  FoodsResponse,
+  PetsResponse,
+  ScheduleEntriesResponse,
+  ScheduleEntryFeedingsResponse,
+  SchedulesResponse,
+} from "../types/pocketbase";
+import { getGivenFeedingsByPetId } from "../utils/feedings";
+import FeedingProgress from "./FeedingProgress.astro";
+import ScheduleTableRow from "./ScheduleTableRow.astro";
+
+type Props = {
+  pet: PetsResponse;
+};
+const { pet } = Astro.props;
+
+const pb = Astro.locals.pb;
+
+const dietFoods = await pb
+  .collection("diet_foods")
+  .getFullList<DietFoodsResponse<{ food: FoodsResponse }>>({
+    filter: `diet.pet.id = "${pet.id}" && diet.is_active = true`,
+    expand: "food",
+  });
+
+const scheduleEntries = await pb.collection("schedule_entries").getFullList<
+  ScheduleEntriesResponse<{
+    food: FoodsResponse;
+    schedule: SchedulesResponse;
+  }>
+>({
+  expand: "food,schedule",
+  filter: `schedule.pet.owner.id ?= "${pb.authStore.model?.id}"`,
+  sort: "time",
+});
+
+const feedings = await pb
+  .collection("feedings")
+  .getFullList<FeedingsResponse<{ food: FoodsResponse }>>({
+    filter: `pet.id = "${pet.id}" && created >= @todayStart && created <= @todayEnd`,
+    expand: "food",
+  });
+
+const scheduleEntryFeedings = await pb
+  .collection("schedule_entry_feedings")
+  .getFullList<
+    ScheduleEntryFeedingsResponse<{
+      schedule_entry: ScheduleEntriesResponse<{
+        food: FoodsResponse;
+      }>;
+    }>
+  >({
+    filter: `pet.id = "${pet.id}" && created >= @todayStart && created <= @todayEnd && is_done = true`,
+    expand: "schedule_entry,schedule_entry.food",
+  });
+
+const givenFood = await getGivenFeedingsByPetId({
+  feedings,
+  scheduleEntryFeedings,
+});
+---
+
+<>
+  <section>
+    <div>
+      <h2>{pet.name}</h2>
+      <span>
+        <iconify-icon icon="tabler:calendar"></iconify-icon>
+        {new Date().getFullYear() - new Date(pet.birthdate).getFullYear()}{" "}
+        ans
+      </span>
+      <span>
+        <iconify-icon icon="tabler:weight"></iconify-icon>
+        {pet.current_weight} kg
+      </span>
+    </div>
+    <div>
+      {
+        dietFoods.map((dietFood) => {
+          const foodName = dietFood.expand!.food.name;
+          const givenQuantity = givenFood[foodName] ?? 0;
+          const percentage = Math.round(
+            (givenQuantity / dietFood.quantity) * 100
+          );
+
+          return (
+            <FeedingProgress
+              petId={pet.id}
+              foodName={foodName}
+              percentage={percentage}
+            />
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <section>
+    <h3>Planning</h3>
+    <figure>
+      <table role="grid">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Heure</th>
+            <th scope="col">Nourriture</th>
+            <th scope="col">Quantité</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            scheduleEntries
+              .filter((entry) => entry.expand?.schedule.pet === pet.id)
+              .map((entry) => (
+                <ScheduleTableRow
+                  scheduleEntry={entry}
+                  isDone={scheduleEntryFeedings.some(
+                    (feeding) =>
+                      feeding.schedule_entry === entry.id && feeding.is_done
+                  )}
+                />
+              ))
+          }
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>Hors planning</h3>
+    <ol>
+      {
+        feedings
+          .filter((feeding) => !feeding.schedule_entry)
+          .map((feeding) => (
+            <li>
+              <mark>
+                <span>{feeding.expand?.food.name}</span>
+                <span>{feeding.quantity} g</span>
+              </mark>
+            </li>
+          ))
+      }
+    </ol>
+  </section>
+</>
