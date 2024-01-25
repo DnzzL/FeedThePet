@@ -1,0 +1,59 @@
+---
+import { zfd } from "zod-form-data";
+import CustomFeedingRow from "../../../components/CustomFeedingRow.astro";
+import type { FeedingsRecord } from "../../../types/pocketbase";
+import { setErrorResponse } from "../../../utils/errors";
+
+const customSchema = zfd.formData({
+  petId: zfd.text(),
+  foodId: zfd.text(),
+  quantity: zfd.numeric(),
+  unit: zfd.text(),
+});
+
+let errorMessage;
+
+let quantity: number;
+let foodName: string;
+let created: string;
+
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const parsed = customSchema.parse(data);
+    const { petId, unit, foodId } = parsed;
+    quantity = parsed.quantity;
+
+    const pb = Astro.locals.pb;
+    const newFeedingData = {
+      feeder: pb.authStore.model!.id,
+      food: foodId,
+      pet: petId,
+      quantity,
+      unit: unit as FeedingsRecord["unit"],
+    } satisfies FeedingsRecord;
+
+    const newFeeding = await pb.collection("feedings").create(newFeedingData);
+    created = newFeeding.created;
+
+    const food = await pb.collection("foods").getOne(foodId);
+    foodName = food.name;
+  } catch (err) {
+    const errorResponse = setErrorResponse(err);
+    errorMessage = errorResponse.message;
+    Astro.response.status = errorResponse.status;
+  }
+}
+---
+
+{
+  !!errorMessage ? (
+    <p>{errorMessage}</p>
+  ) : (
+    <CustomFeedingRow
+      created={created}
+      foodName={foodName}
+      quantity={quantity}
+    />
+  )
+}

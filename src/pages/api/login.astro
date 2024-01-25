@@ -18,7 +18,7 @@ if (Astro.request.method === "POST") {
 
     const pb = Astro.locals.pb;
     await pb.collection("users").authWithPassword(username, password);
-    Astro.response.headers.set("HX-Redirect", "/pets");
+    Astro.response.headers.set("HX-Redirect", "/");
   } catch (error) {
     console.log(error);
     if (error instanceof ClientResponseError) {

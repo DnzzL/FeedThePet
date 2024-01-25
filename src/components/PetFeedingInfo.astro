@@ -8,8 +8,7 @@ import type {
   ScheduleEntryFeedingsResponse,
   SchedulesResponse,
 } from "../types/pocketbase";
-import { getGivenFeedingsByPetId } from "../utils/feedings";
-import FeedingProgress from "./FeedingProgress.astro";
+import CustomFeedingRow from "./CustomFeedingRow.astro";
 import ScheduleTableRow from "./ScheduleTableRow.astro";
 
 type Props = {
@@ -56,11 +55,6 @@ const scheduleEntryFeedings = await pb
     filter: `pet.id = "${pet.id}" && created >= @todayStart && created <= @todayEnd && is_done = true`,
     expand: "schedule_entry,schedule_entry.food",
   });
-
-const givenFood = await getGivenFeedingsByPetId({
-  feedings,
-  scheduleEntryFeedings,
-});
 ---
 
 <>
@@ -99,49 +93,78 @@ const givenFood = await getGivenFeedingsByPetId({
   </section>
 
   <section>
-    <h3>Planning</h3>
-    <figure>
-      <table role="grid">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Heure</th>
-            <th scope="col">Nourriture</th>
-            <th scope="col">Quantité</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            scheduleEntries
-              .filter((entry) => entry.expand?.schedule.pet === pet.id)
-              .map((entry) => (
-                <ScheduleTableRow
-                  scheduleEntry={entry}
-                  isDone={scheduleEntryFeedings.some(
-                    (feeding) =>
-                      feeding.schedule_entry === entry.id && feeding.is_done
-                  )}
-                />
-              ))
-          }
-        </tbody>
-      </table>
-    </figure>
+    <details open>
+      <summary>Planning</summary>
+      <figure>
+        <table role="grid">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Heure</th>
+              <th scope="col">Nourriture</th>
+              <th scope="col">Quantité</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              scheduleEntries
+                .filter((entry) => entry.expand?.schedule.pet === pet.id)
+                .map((entry) => (
+                  <ScheduleTableRow
+                    scheduleEntry={entry}
+                    isDone={scheduleEntryFeedings.some(
+                      (feeding) =>
+                        feeding.schedule_entry === entry.id && feeding.is_done
+                    )}
+                  />
+                ))
+            }
+          </tbody>
+        </table>
+      </figure>
+    </details>
 
-    <h3>Hors planning</h3>
-    <ol>
-      {
-        feedings
-          .filter((feeding) => !feeding.schedule_entry)
-          .map((feeding) => (
-            <li>
-              <mark>
-                <span>{feeding.expand?.food.name}</span>
-                <span>{feeding.quantity} g</span>
-              </mark>
-            </li>
+    <details>
+      <summary>Hors planning</summary>
+      <div class="error"></div>
+      <form
+        class='grid"'
+        hx-post="/api/feeding/custom"
+        hx-target="#customFeedings"
+        hx-swap="afterbegin"
+        hx-target-errors="closest .error"
+      >
+        <input type="hidden" name="petId" value={pet.id} />
+        <label for="foodId">Nourriture</label>
+        <select name="foodId">
+          {
+            dietFoods.map((df) => (
+              <option value={df.food}>{df.expand?.food.name}</option>
+            ))
+          }
+        </select>
+        <label for="quantity"
+          >Quantité <input type="number" name="quantity" min="0" /></label
+        >
+        <label for="unit">Unité</label>
+        <select name="unit">
+          <option value="g">g</option>
+          <option value="boîte">boîte</option>
+        </select>
+        <button type="submit">Ajouter</button>
+      </form>
+
+      <ol id="customFeedings">
+        {
+          feedings.map((feeding) => (
+            <CustomFeedingRow
+              created={feeding.created}
+              foodName={feeding.expand!.food.name}
+              quantity={feeding.quantity}
+            />
           ))
-      }
-    </ol>
+        }
+      </ol>
+    </details>
   </section>
 </>

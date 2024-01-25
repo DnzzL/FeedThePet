@@ -53,12 +53,12 @@ export type DietFeelsRecord = {
 }
 
 export enum DietFoodsUnitOptions {
-	"can" = "can",
-	"grams" = "grams",
+	"boîte" = "boîte",
+	"g" = "g",
 }
 export type DietFoodsRecord = {
 	diet: RecordIdString
-	food: RecordIdString[]
+	food: RecordIdString
 	quantity: number
 	unit: DietFoodsUnitOptions
 }
@@ -69,13 +69,17 @@ export type DietsRecord = {
 	total_daily?: number
 }
 
+export enum FeedingsUnitOptions {
+	"boîte" = "boîte",
+	"g" = "g",
+}
 export type FeedingsRecord = {
 	feeder: RecordIdString
 	food: RecordIdString
 	note?: string
 	pet: RecordIdString
 	quantity: number
-	schedule_entry?: RecordIdString
+	unit: FeedingsUnitOptions
 }
 
 export enum FoodsCategoryOptions {

@@ -1,0 +1,70 @@
+---
+import FeedingProgress from "../../../components/FeedingProgress.astro";
+import type {
+  DietFoodsResponse,
+  FeedingsResponse,
+  FoodsResponse,
+  ScheduleEntriesResponse,
+  ScheduleEntryFeedingsResponse,
+} from "../../../types/pocketbase";
+import { getGivenFeedingsByPetId } from "../../../utils/feedings";
+
+type Props = {
+  petId: string;
+};
+const { petId } = Astro.params;
+
+const pb = Astro.locals.pb;
+
+const dietFoods = await pb
+  .collection("diet_foods")
+  .getFullList<DietFoodsResponse<{ food: FoodsResponse }>>({
+    filter: `diet.pet.id = "${petId}" && diet.is_active = true`,
+    expand: "food",
+  });
+
+const feedings = await pb
+  .collection("feedings")
+  .getFullList<FeedingsResponse<{ food: FoodsResponse }>>({
+    filter: `pet.id = "${petId}" && created >= @todayStart && created <= @todayEnd`,
+    expand: "food",
+  });
+
+const scheduleEntryFeedings = await pb
+  .collection("schedule_entry_feedings")
+  .getFullList<
+    ScheduleEntryFeedingsResponse<{
+      schedule_entry: ScheduleEntriesResponse<{
+        food: FoodsResponse;
+      }>;
+    }>
+  >({
+    filter: `pet.id = "${petId}" && created >= @todayStart && created <= @todayEnd && is_done = true`,
+    expand: "schedule_entry,schedule_entry.food",
+  });
+
+const givenFood = await getGivenFeedingsByPetId({
+  feedings,
+  scheduleEntryFeedings,
+});
+
+export const partial = true;
+---
+
+<div>
+  {
+    dietFoods.map((dietFood) => {
+      const foodName = dietFood.expand!.food.name;
+      const givenQuantity = givenFood[foodName] ?? 0;
+      const percentage = Math.round((givenQuantity / dietFood.quantity) * 100);
+
+      return (
+        <FeedingProgress
+          petId={petId}
+          foodName={foodName}
+          percentage={percentage}
+        />
+      );
+    })
+  }
+</div>

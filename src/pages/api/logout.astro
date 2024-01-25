@@ -1,5 +1,6 @@
 ---
 import { ClientResponseError } from "pocketbase";
+import { z } from "zod";
 
 let isSubmitted = false;
 let errorMessage: string | null = null;
@@ -10,10 +11,17 @@ if (Astro.request.method === "POST") {
     await pb.authStore.clear();
     Astro.response.headers.set("HX-Redirect", "/login");
   } catch (error) {
-    if (error instanceof ClientResponseError) {
+    if (error instanceof z.ZodError) {
+      errorMessage = error.issues
+        .map(({ path, message }) => `${path[0]} : ${message}`)
+        .join(", ");
+      Astro.response.status = 400;
+    } else if (error instanceof ClientResponseError) {
       errorMessage = error.message;
       Astro.response.status = error.status;
-      Astro.response.statusText = errorMessage;
+    } else {
+      errorMessage = "Erreur interne";
+      Astro.response.status = 500;
     }
   } finally {
     isSubmitted = true;
