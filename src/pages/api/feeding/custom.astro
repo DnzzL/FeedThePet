@@ -38,6 +38,7 @@ if (Astro.request.method === "POST") {
 
     const food = await pb.collection("foods").getOne(foodId);
     foodName = food.name;
+    Astro.response.headers.set("HX-Trigger", "feeding-update");
   } catch (err) {
     const errorResponse = setErrorResponse(err);
     errorMessage = errorResponse.message;

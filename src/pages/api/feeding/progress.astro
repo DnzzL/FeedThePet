@@ -12,7 +12,7 @@ import { getGivenFeedingsByPetId } from "../../../utils/feedings";
 type Props = {
   petId: string;
 };
-const { petId } = Astro.params;
+const petId = Astro.url.searchParams.get("petId");
 
 const pb = Astro.locals.pb;
 
