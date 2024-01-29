@@ -1,10 +1,11 @@
 ---
 type Props = {
+  id: string;
   created: string;
   foodName: string;
   quantity: number;
 };
-const { created, foodName, quantity } = Astro.props;
+const { id, created, foodName, quantity } = Astro.props;
 
 const feedingTime = new Date(created).toLocaleTimeString(["fr-FR"], {
   hour: "2-digit",
@@ -20,4 +21,10 @@ export const partial = true;
     <span>{quantity} g</span> -
     <span>{foodName}</span>
   </mark>
+  <button
+    hx-delete=`/api/feeding/${id}`
+    hx-target="closest li"
+    hx-swap="outerHTML"
+    ><iconify-icon icon="tabler:trash-x"></iconify-icon></button
+  >
 </li>

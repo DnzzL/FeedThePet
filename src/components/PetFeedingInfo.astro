@@ -154,6 +154,7 @@ const scheduleEntryFeedings = await pb
         {
           feedings.map((feeding) => (
             <CustomFeedingRow
+              id={feeding.id}
               created={feeding.created}
               foodName={feeding.expand!.food.name}
               quantity={feeding.quantity}

@@ -1,0 +1,17 @@
+---
+import { setErrorResponse } from "../../../utils/errors";
+
+const pb = Astro.locals.pb;
+
+let id;
+
+if (Astro.request.method === "DELETE") {
+  const { id } = Astro.params;
+
+  try {
+    await pb.collection("feedings").delete(id!);
+  } catch (err) {
+    setErrorResponse(err);
+  }
+}
+---
