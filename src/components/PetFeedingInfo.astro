@@ -135,7 +135,12 @@ const scheduleEntryFeedings = await pb
           }
         </select>
         <label for="quantity"
-          >Quantité <input type="number" name="quantity" min="0" /></label
+          >Quantité <input
+            type="number"
+            name="quantity"
+            min="0"
+            step="any"
+          /></label
         >
         <label for="unit">Unité</label>
         <select name="unit">
