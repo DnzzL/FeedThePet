@@ -1,0 +1,60 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const { id } = Astro.params;
+
+const pb = Astro.locals.pb;
+
+const pet = await pb.collection("pets").getOne(id!);
+
+const schedules = await pb.collection("schedules").getFullList({
+  filter: `pet = "${id}"`,
+});
+---
+
+<Layout title={pet.name}>
+  <section>
+    <h2>{pet.name}</h2>
+    <span>
+      <iconify-icon icon="tabler:calendar"></iconify-icon>
+      {new Date().getFullYear() - new Date(pet.birthdate).getFullYear()}
+      ans
+    </span>
+    <span>
+      <iconify-icon icon="tabler:weight"></iconify-icon>
+      {pet.current_weight} kg
+    </span>
+  </section>
+
+  <section>
+    <h3>Planning</h3>
+    <button>+</button>
+
+    <figure>
+      <table role="grid">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Créé le</th>
+            <th scope="col">Modifié le</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            schedules.map((schedule, index) => (
+              <tr>
+                <td>{index + 1}</td>
+                <td>{new Date(schedule.created).toLocaleString("fr-FR")}</td>
+                <td>{new Date(schedule.updated).toLocaleString("fr-FR")}</td>
+                <td>
+                  <button>Modifier</button>
+                  <button class="outline">Supprimer</button>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </figure>
+  </section>
+</Layout>

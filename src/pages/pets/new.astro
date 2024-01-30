@@ -1,0 +1,28 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Nouvel animal">
+  <h2>Nouvel animal</h2>
+  <div class="error"></div>
+  <form hx-post="/api/pets/new" hx-target-error="closest .error">
+    <label for="name">Nom<input type="text" name="name" /></label>
+
+    <label for="type">Select</label>
+    <select name="type" required>
+      <option value="cat">chat</option>
+      <option value="dog">chien</option>
+      <option value="bird">oiseau</option>
+    </select>
+
+    <label for="birthdate"
+      >Date de naissance<input type="date" name="birthdate" /></label
+    >
+
+    <label for="name"
+      >Poids actuel<input type="number" name="current_weight" /></label
+    >
+
+    <button type="submit">Créer</button>
+  </form>
+</Layout>

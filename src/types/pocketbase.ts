@@ -98,17 +98,17 @@ export type PetWeightsRecord = {
 	weight?: number
 }
 
-export enum PetsAnimalTypeOptions {
+export enum PetsTypeOptions {
 	"cat" = "cat",
 	"dog" = "dog",
 	"bird" = "bird",
 }
 export type PetsRecord = {
-	animal_type: PetsAnimalTypeOptions
 	birthdate?: IsoDateString
 	current_weight?: number
 	name: string
 	owner: RecordIdString[]
+	type: PetsTypeOptions
 }
 
 export enum ScheduleEntriesUnitOptions {

@@ -8,6 +8,8 @@ const authCookie = defineMiddleware(
   async ({ locals, request }: any, next: () => any) => {
     locals.pb = new PocketBase(process.env.POCKETBASE_URL);
 
+    locals.pb.autoCancellation(false);
+
     // load the store data from the request cookie string
     locals.pb.authStore.loadFromCookie(request.headers.get("cookie") || "");
 

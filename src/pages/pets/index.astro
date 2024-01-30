@@ -1,22 +1,17 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "../../layouts/Layout.astro";
 
 const pb = Astro.locals.pb;
 
 const pets = await pb.collection("pets").getFullList({
   filter: `owner.id ?= "${pb.authStore.model?.id}"`,
 });
-
-const weights = await pb.collection("pet_weights").getFullList({
-  filter: `pet.owner.id ?= "${pb.authStore.model?.id}"`,
-  sort: "-created",
-});
 ---
 
 <Layout title="Animaux">
   <section>
     <h1>Mes animaux</h1>
-    <button>+</button>
+    <a href="/pets/new"><button>+</button></a>
   </section>
 
   <section>
@@ -24,21 +19,23 @@ const weights = await pb.collection("pet_weights").getFullList({
       pets.map((pet) => (
         <article>
           <div style={{ display: "flex", direction: "row", gap: "12px" }}>
-            <img
-              style={{ width: "72px", height: "72px" }}
-              src="https://img.freepik.com/free-vector/sweet-eyed-kitten-cartoon-character_1308-134970.jpg?w=2000&t=st=1705516708~exp=1705517308~hmac=5865fd177aa06774c08d144dc7466a3044f2b6719f900dc1a2520be3e4386ec4"
-            />
+            <a href={`/pets/${pet.id}`}>
+              <img
+                style={{ width: "72px", height: "72px" }}
+                src="https://img.freepik.com/free-vector/sweet-eyed-kitten-cartoon-character_1308-134970.jpg?w=2000&t=st=1705516708~exp=1705517308~hmac=5865fd177aa06774c08d144dc7466a3044f2b6719f900dc1a2520be3e4386ec4"
+              />
+            </a>
             <div>
               <h2>{pet.name}</h2>
               <span>
                 <iconify-icon icon="tabler:calendar" />
                 {new Date().getFullYear() -
-                  new Date(pet.birthdate).getFullYear()}{" "}
+                  new Date(pet.birthdate).getFullYear()}
                 ans
               </span>
               <span>
                 <iconify-icon icon="tabler:weight" />
-                {weights.find((w) => w.pet === pet.id)?.weight} kg
+                {pet.current_weight} kg
               </span>
             </div>
           </div>

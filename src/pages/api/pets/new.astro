@@ -1,0 +1,41 @@
+---
+import { zfd } from "zod-form-data";
+import { setErrorResponse } from "../../../utils/errors";
+
+const newPetSchema = zfd.formData({
+  name: zfd.text(),
+  type: zfd.text(),
+  birthdate: zfd.text().optional(),
+  current_weight: zfd.numeric().optional(),
+});
+
+let isSubmitted = false;
+let errorMessage: string | null = null;
+
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const { name, type, birthdate, current_weight } = newPetSchema.parse(data);
+
+    const pb = Astro.locals.pb;
+    await pb.collection("pets").create({
+      name,
+      type,
+      birthdate,
+      current_weight,
+      owner: pb.authStore.model!.id,
+    });
+    Astro.response.headers.set("HX-Redirect", "/pets");
+  } catch (error) {
+    const { message, status } = setErrorResponse(error);
+    Astro.response.status = status;
+    errorMessage = message;
+  } finally {
+    isSubmitted = true;
+  }
+}
+
+export const partial = true;
+---
+
+<p>Erreur: {errorMessage}</p>
