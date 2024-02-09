@@ -74,7 +74,7 @@ const scheduleEntryFeedings = await pb
     <div
       hx-get="/api/feeding/progress"
       hx-trigger="load, feeding-update from:body"
-      hw-swap="outerHTML"
+      hx-swap="outerHTML"
       hx-target="#feedingProgress"
       hx-include="this"
     >
