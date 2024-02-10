@@ -9,8 +9,6 @@ import type {
 
 const pb = Astro.locals.pb;
 
-const today = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-
 const toggleSchema = zfd.formData({
   petId: zfd.text(),
   scheduleEntryId: zfd.text(),
@@ -31,8 +29,9 @@ if (Astro.request.method === "PUT") {
     const existingScheduleFeeding = await pb
       .collection("schedule_entry_feedings")
       .getFullList({
-        filter: `schedule_entry.schedule.pet.id = "${petId}" && schedule_entry.id = "${scheduleEntryId}" && created > "${today}"`,
+        filter: `schedule_entry.schedule.pet.id = "${petId}" && schedule_entry.id = "${scheduleEntryId}" && created >= @todayStart`,
       });
+    console.log(existingScheduleFeeding);
 
     scheduleEntry = await pb.collection("schedule_entries").getOne<
       ScheduleEntriesResponse<{
