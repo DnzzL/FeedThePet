@@ -49,10 +49,6 @@ if (Astro.request.method === "PUT") {
         .update(existingScheduleFeeding[0].id, {
           is_done: !initialDone,
         });
-
-      if (!initialDone) {
-        Astro.response.headers.set("HX-Trigger", "new-feeding");
-      }
     } else {
       await pb.collection("schedule_entry_feedings").create({
         quantity: scheduleEntry.quantity,

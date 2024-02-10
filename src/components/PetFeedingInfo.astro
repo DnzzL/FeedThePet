@@ -74,12 +74,10 @@ const scheduleEntryFeedings = await pb
     <div
       hx-get="/api/feeding/progress"
       hx-trigger="load, feeding-update from:body"
-      hx-swap="outerHTML"
       hx-target="#feedingProgress"
       hx-include="this"
     >
       <input type="hidden" name="petId" value={pet.id} />
-      <img class="htmx-indicator" src="/spinner.svg" />
     </div>
     <div id="feedingProgress"></div>
   </section>
