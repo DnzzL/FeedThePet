@@ -10,6 +10,7 @@ if (Astro.request.method === "DELETE") {
 
   try {
     await pb.collection("feedings").delete(id!);
+    Astro.response.headers.set("HX-Trigger", "feeding-update");
   } catch (err) {
     setErrorResponse(err);
   }

@@ -31,7 +31,6 @@ if (Astro.request.method === "PUT") {
       .getFullList({
         filter: `schedule_entry.schedule.pet.id = "${petId}" && schedule_entry.id = "${scheduleEntryId}" && created >= @todayStart`,
       });
-    console.log(existingScheduleFeeding);
 
     scheduleEntry = await pb.collection("schedule_entries").getOne<
       ScheduleEntriesResponse<{
